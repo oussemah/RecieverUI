@@ -138,18 +138,6 @@ const byte NUMBERS[] = {
   0b01110001  // F
 };
 
-// definition for error
-const byte ERROR_DATA[] = {
-  0b01111001, // E
-  0b01010000, // r
-  0b01010000, // r
-  0b01011100, // o
-  0b01010000, // r
-  0,
-  0,
-  0
-};
-
 const byte MINUS = 0b01000000;
 
 class RecieverUI {
@@ -170,7 +158,7 @@ class RecieverUI {
     	void clearDisplayDigit(byte pos, boolean dot);
     	
 	/** Set the display to the values (left to right) */
-    	void setDisplay(const byte values[], unsigned int length = 4);
+    	void setDisplay(const byte values[], unsigned int length = 4, const byte font[] = NUMBERS);
     	
 	/** Clear the display */
 	void clearDisplay();

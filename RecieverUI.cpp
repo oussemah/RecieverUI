@@ -56,7 +56,7 @@ void RecieverUI::setDisplayDigit(byte digit, byte pos, boolean dot, const byte n
 
 void RecieverUI::setDisplayToError()
 {
-    setDisplay(ERROR_DATA, 4);
+    setDisplayToString("Eror", 0, 0);
 }
 
 void RecieverUI::clearDisplayDigit(byte pos, boolean dot)
@@ -64,16 +64,19 @@ void RecieverUI::clearDisplayDigit(byte pos, boolean dot)
   sendChar(pos, 0, dot);
 }
 
-void RecieverUI::setDisplay(const byte values[], unsigned int size)
+void RecieverUI::setDisplay(const byte values[], unsigned int size, const byte font[])
 {
   for (int i = 0; i < size; i++) {
-    sendChar(i, values[i], 0);
+    setDisplayDigit(values[i], i, 0, font);
   }
 }
 
 void RecieverUI::clearDisplay()
 {
-  sendData(1, 0);
+  sendChar(0, 0, true);
+  sendChar(1, 0, true);
+  sendChar(2, 0, true);
+  sendChar(3, 0, true);
 }
 
 void RecieverUI::setDisplayToString(const char* string, const word dots, const byte pos, const byte font[])
@@ -219,7 +222,7 @@ byte RecieverUI::getButtons(void)
 
   digitalWrite(strobePin, LOW);
   send(0x42);
-  for (int i = 0; i < 4; i++) { // we have 8 buttons; do we need to change the 4 to 8 ??
+  for (int i = 0; i < 7; i++) { // we have 8 buttons; do we need to change the 4 to 8 ??
     keys |= receive() << i;
   }
   digitalWrite(strobePin, HIGH);
