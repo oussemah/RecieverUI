@@ -16,7 +16,7 @@ void setup()
 {
   Serial.begin(9600);
   ui.setupDisplay( true, 7); //Maximum brightness
-  ui.setDisplayToString("2608");
+  ui.setDisplayToString("CAN5");
   delay(1000);
   ui.setDisplayDigit(7, 1, true);
   delay(1000);
