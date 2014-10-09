@@ -32,7 +32,7 @@ RecieverUI::RecieverUI(byte dataPin, byte clockPin, byte strobePin, byte intensi
 
   digitalWrite(strobePin, LOW);
   send(0xC0);
-  for (int i = 0; i < 16; i++) { //Why is this ?
+  for (int i = 0; i < 8; i++) { // Initiate all digits to null
     send(0x00);
   }
   digitalWrite(strobePin, HIGH);
@@ -41,12 +41,6 @@ RecieverUI::RecieverUI(byte dataPin, byte clockPin, byte strobePin, byte intensi
 void RecieverUI::setupDisplay(boolean active, byte intensity)
 {
   sendCommand(0x80 | (active ? 8 : 0) | min(7, intensity));
-
-  // necessary for the TM1640 // Why is this ?
-  digitalWrite(strobePin, LOW);
-  digitalWrite(clockPin, LOW);
-  digitalWrite(clockPin, HIGH);
-  digitalWrite(strobePin, HIGH);
 }
 
 void RecieverUI::setDisplayDigit(byte digit, byte pos, boolean dot, const byte numberFont[])
@@ -170,7 +164,7 @@ void RecieverUI::setDisplayToHexNumber(unsigned long number, byte dots, boolean 
 
 void RecieverUI::setDisplayToDecNumberAt(unsigned long number, byte dots, byte startingPos, boolean leadingZeros,const byte numberFont[])
 {
-  if (number > 99999999L) {
+  if (number > 9999L) {
     setDisplayToError();
   } else {
     for (int i = 0; i < 4 - startingPos; i++) {
@@ -200,7 +194,7 @@ void RecieverUI::setDisplayToSignedDecNumber(signed long number, byte dots, bool
         if (number >= 0) {
                 setDisplayToDecNumberAt(number, dots, 0, leadingZeros, numberFont);
         } else {
-                if (-number > 9999999L) {
+                if (-number > 999L) {
                     setDisplayToError();
                 } else {
                         setDisplayToDecNumberAt(-number, dots, 1, leadingZeros, numberFont);
@@ -222,7 +216,7 @@ byte RecieverUI::getButtons(void)
 
   digitalWrite(strobePin, LOW);
   send(0x42);
-  for (int i = 0; i < 7; i++) { // we have 8 buttons; do we need to change the 4 to 8 ??
+  for (int i = 0; i < 7; i++) { // we have 8 buttons;
     keys |= receive() << i;
   }
   digitalWrite(strobePin, HIGH);
