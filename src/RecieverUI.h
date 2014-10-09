@@ -169,6 +169,20 @@ class RecieverUI {
     	/** Set the display to the String (defaults to built in font) */
 	virtual void setDisplayToString(String string, const word dots = 0, const byte pos = 0,
 		const byte font[] = CHARS);
+    	/** Set the display to a unsigned hexadecimal number (with or without leading zeros) */
+	void setDisplayToHexNumber(unsigned long number, byte dots, boolean leadingZeros = true,
+                const byte numberFont[] = NUMBER_FONT);
+	/** Set the display to a unsigned decimal number (with or without leading zeros) */
+    	void setDisplayToDecNumber(unsigned long number, byte dots, boolean leadingZeros = true,
+                const byte numberFont[] = NUMBER_FONT);
+    	/** Set the display to a signed decimal number (with or without leading zeros) */
+    	void setDisplayToSignedDecNumber(signed long number, byte dots, boolean leadingZeros = true,
+                const byte numberFont[] = NUMBER_FONT);
+    	/** Set the display to a unsigned binary number */
+    	void setDisplayToBinNumber(byte number, byte dots,
+                const byte numberFont[] = NUMBER_FONT);
+	/** Returns the pressed buttons as a bit set (left to right). */
+    	virtual byte getButtons();
 
   protected:
   	byte dataPin;
@@ -185,7 +199,8 @@ class RecieverUI {
     	virtual void sendData(byte add, byte data);
     	virtual void send(byte data);
     	virtual byte receive();
+    	void setDisplayToDecNumberAt(unsigned long number, byte dots, byte startingPos,
+        	boolean leadingZeros, const byte numberFont[]);
 }
 
 #endif
-

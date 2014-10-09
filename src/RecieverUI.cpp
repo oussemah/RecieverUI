@@ -56,7 +56,7 @@ void RecieverUI::setDisplayDigit(byte digit, byte pos, boolean dot, const byte n
 
 void RecieverUI::setDisplayToError()
 {
-    setDisplay(ERROR_DATA, 8);
+    setDisplay(ERROR_DATA, 4);
 }
 
 void RecieverUI::clearDisplayDigit(byte pos, boolean dot)
@@ -73,16 +73,14 @@ void RecieverUI::setDisplay(const byte values[], unsigned int size)
 
 void RecieverUI::clearDisplay()
 {
-  for (int i = 0; i < displays; i++) {
-    sendData(i << 1, 0);
-  }
+  sendData(1, 0);
 }
 
 void RecieverUI::setDisplayToString(const char* string, const word dots, const byte pos, const byte font[])
 {
-  for (int i = 0; i < displays - pos; i++) {
+  for (int i = 0; i < 4 - pos; i++) {
   	if (string[i] != '\0') {
-	  sendChar(i + pos, font[string[i] - 32], (dots & (1 << (displays - i - 1))) != 0);
+	  sendChar(i + pos, font[string[i] - 32], (dots & (1 << (3 - i))) != 0);
 	} else {
 	  break;
 	}
@@ -93,9 +91,9 @@ void RecieverUI::setDisplayToString(const String string, const word dots, const 
 {
   int stringLength = string.length();
 
-  for (int i = 0; i < displays - pos; i++) {
+  for (int i = 0; i < 4 - pos; i++) {
     if (i < stringLength) {
-      sendChar(i + pos, font[string.charAt(i) - 32], (dots & (1 << (displays - i - 1))) != 0);
+      sendChar(i + pos, font[string.charAt(i) - 32], (dots & (1 << (3 - i))) != 0);
     } else {
       break;
     }
@@ -122,8 +120,7 @@ void RecieverUI::send(byte data)
 {
   for (int i = 0; i < 8; i++) {
     digitalWrite(clockPin, LOW);
-    digitalWrite(dataPin, data & 1 ? HIGH : LOW);
-    data >>= 1;
+    digitalWrite(dataPin, (data >> i) & 1 ? HIGH : LOW);
     digitalWrite(clockPin, HIGH);
   }
 }
@@ -136,7 +133,7 @@ byte RecieverUI::receive()
   pinMode(dataPin, INPUT);
   digitalWrite(dataPin, HIGH);
 
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i++) { //8 buttons
     temp >>= 1;
 
     digitalWrite(clockPin, LOW);
@@ -155,8 +152,85 @@ byte RecieverUI::receive()
   return temp;
 }
 
-#if !defined(ARDUINO) || ARDUINO < 100
-// empty implementation instead of pure virtual for older Arduino IDE
-void RecieverUI::sendChar(byte pos, byte data, boolean dot) {}
-#endif
+void RecieverUI::setDisplayToHexNumber(unsigned long number, byte dots, boolean leadingZeros,
+        const byte numberFont[])
+{
+  for (int i = 0; i < 4; i++) {
+        if (!leadingZeros && number == 0) {
+                clearDisplayDigit(3 - i, (dots & (1 << i)) != 0);
+        } else {
+                setDisplayDigit(number & 0xF, 3 - i, (dots & (1 << i)) != 0, numberFont);
+                number >>= 4;
+    }
+  }
+}
+
+void RecieverUI::setDisplayToDecNumberAt(unsigned long number, byte dots, byte startingPos, boolean leadingZeros,
+        const byte numberFont[])
+{
+  if (number > 99999999L) {
+    setDisplayToError();
+  } else {
+    for (int i = 0; i < 4 - startingPos; i++) {
+      if (number != 0) {
+        setDisplayDigit(number % 10, 3 - i, (dots & (1 << i)) != 0, numberFont);
+        number /= 10;
+      } else {
+                if (leadingZeros) {
+                  setDisplayDigit(0, 3 - i, (dots & (1 << i)) != 0, numberFont);
+                } else {
+                  clearDisplayDigit(3 - i, (dots & (1 << i)) != 0);
+                }
+      }
+    }
+  }
+}
+
+void RecieverUI::setDisplayToDecNumber(unsigned long number, byte dots, boolean leadingZeros,
+        const byte numberFont[])
+{
+        setDisplayToDecNumberAt(number, dots, 0, leadingZeros, numberFont);
+}
+
+
+void TM1638::setDisplayToSignedDecNumber(signed long number, byte dots, boolean leadingZeros,
+                const byte numberFont[])
+{
+        if (number >= 0) {
+                setDisplayToDecNumberAt(number, dots, 0, leadingZeros, numberFont);
+        } else {
+                if (-number > 9999999L) {
+                    setDisplayToError();
+                } else {
+                        setDisplayToDecNumberAt(-number, dots, 1, leadingZeros, numberFont);
+                        sendChar(0, MINUS, (dots & (0x80)) != 0);
+                }
+        }
+}
+
+void RecieverUI::setDisplayToBinNumber(byte number, byte dots, const byte numberFont[])
+{
+  for (int i = 0; i < 4; i++) {
+    setDisplayDigit((number & (1 << i)) == 0 ? 0 : 1, 3 - i, (dots & (1 << i)) != 0, numberFont);
+  }
+}
+
+byte RecieverUI::getButtons(void)
+{
+  byte keys = 0;
+
+  digitalWrite(strobePin, LOW);
+  send(0x42);
+  for (int i = 0; i < 4; i++) { // we have 8 buttons; do we need to change the 4 to 8 ??
+    keys |= receive() << i;
+  }
+  digitalWrite(strobePin, HIGH);
+
+  return keys;
+}
+
+void RecieverUI::sendChar(byte pos, byte data, boolean dot)
+{
+        sendData(pos << 1, data | (dot ? 0b10000000 : 0)); // what's the meaning of 0b10000000 ??
+}
 
