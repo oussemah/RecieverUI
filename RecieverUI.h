@@ -138,6 +138,18 @@ const byte NUMBERS[] = {
   0b01110001  // F
 };
 
+// definition for error
+const byte ERROR_DATA[] = {
+  0b01111001, // E
+  0b01010000, // r
+  0b01010000, // r
+  0b01011100, // o
+  0b01010000, // r
+  0,
+  0,
+  0
+};
+
 const byte MINUS = 0b01000000;
 
 class RecieverUI {
@@ -146,61 +158,50 @@ class RecieverUI {
 	RecieverUI(byte dataPin, byte clockPin, byte strobePin, byte intensity = 7);
 
     	/** Set the display (segments and LEDs) active or off and intensity (range from 0-7). */
-    	virtual void setupDisplay(boolean active, byte intensity);
+    	void setupDisplay(boolean active, byte intensity);
 
     	/** Set a single display at pos (starting at 0) to a digit (left to right) */
-    	virtual void setDisplayDigit(byte digit, byte pos, boolean dot, const byte numberFont[] = NUMBERS);
+    	void setDisplayDigit(byte digit, byte pos, boolean dot, const byte numberFont[] = NUMBERS);
 	
 	/** Set the display to an error message */
-	virtual void setDisplayToError();
+	void setDisplayToError();
 	
 	/** Clear  a single display at pos (starting at 0, left to right) */ 
-    	virtual void clearDisplayDigit(byte pos, boolean dot);
+    	void clearDisplayDigit(byte pos, boolean dot);
     	
 	/** Set the display to the values (left to right) */
-    	virtual void setDisplay(const byte values[], unsigned int length = 4);
+    	void setDisplay(const byte values[], unsigned int length = 4);
     	
 	/** Clear the display */
-	virtual void clearDisplay();
+	void clearDisplay();
 
     	/** Set the display to the string (defaults to built in font) */
-	virtual void setDisplayToString(const char* string, const word dots = 0, const byte pos = 0,
-		const byte font[] = CHARS);
+	void setDisplayToString(const char* string, const word dots = 0, const byte pos = 0, const byte font[] = CHARS);
     	/** Set the display to the String (defaults to built in font) */
-	virtual void setDisplayToString(String string, const word dots = 0, const byte pos = 0,
-		const byte font[] = CHARS);
+	void setDisplayToString(String string, const word dots = 0, const byte pos = 0, const byte font[] = CHARS);
     	/** Set the display to a unsigned hexadecimal number (with or without leading zeros) */
-	void setDisplayToHexNumber(unsigned long number, byte dots, boolean leadingZeros = true,
-                const byte numberFont[] = NUMBER_FONT);
+	void setDisplayToHexNumber(unsigned long number, byte dots, boolean leadingZeros = true, const byte numberFont[] = NUMBERS);
 	/** Set the display to a unsigned decimal number (with or without leading zeros) */
-    	void setDisplayToDecNumber(unsigned long number, byte dots, boolean leadingZeros = true,
-                const byte numberFont[] = NUMBER_FONT);
+    	void setDisplayToDecNumber(unsigned long number, byte dots, boolean leadingZeros = true, const byte numberFont[] = NUMBERS);
     	/** Set the display to a signed decimal number (with or without leading zeros) */
-    	void setDisplayToSignedDecNumber(signed long number, byte dots, boolean leadingZeros = true,
-                const byte numberFont[] = NUMBER_FONT);
+    	void setDisplayToSignedDecNumber(signed long number, byte dots, boolean leadingZeros = true,const byte numberFont[] = NUMBERS);
     	/** Set the display to a unsigned binary number */
-    	void setDisplayToBinNumber(byte number, byte dots,
-                const byte numberFont[] = NUMBER_FONT);
+    	void setDisplayToBinNumber(byte number, byte dots, const byte numberFont[] = NUMBERS);
 	/** Returns the pressed buttons as a bit set (left to right). */
-    	virtual byte getButtons();
+    	byte getButtons();
 
   protected:
   	byte dataPin;
 	byte clockPin;
 	byte strobePin;
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	// pure virtual is NOT supported in older Arduino IDE
-	virtual void sendChar(byte pos, byte data, boolean dot) = 0;
-#else
-	virtual void sendChar(byte pos, byte data, boolean dot);
-#endif
-    	virtual void sendCommand(byte led);
-    	virtual void sendData(byte add, byte data);
-    	virtual void send(byte data);
-    	virtual byte receive();
-    	void setDisplayToDecNumberAt(unsigned long number, byte dots, byte startingPos,
-        	boolean leadingZeros, const byte numberFont[]);
-}
+	void sendChar(byte pos, byte data, boolean dot);
+
+    	void sendCommand(byte led);
+    	void sendData(byte add, byte data);
+    	void send(byte data);
+    	byte receive();
+    	void setDisplayToDecNumberAt(unsigned long number, byte dots, byte startingPos, boolean leadingZeros, const byte numberFont[]);
+};
 
 #endif

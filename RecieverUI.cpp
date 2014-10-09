@@ -28,7 +28,7 @@ RecieverUI::RecieverUI(byte dataPin, byte clockPin, byte strobePin, byte intensi
   digitalWrite(clockPin, HIGH);
 
   sendCommand(0x40);
-  sendCommand(0x80 | (8 | min(7, intensity));
+  sendCommand(0x80 | (8 | min(7, intensity)));
 
   digitalWrite(strobePin, LOW);
   send(0xC0);
@@ -165,8 +165,7 @@ void RecieverUI::setDisplayToHexNumber(unsigned long number, byte dots, boolean 
   }
 }
 
-void RecieverUI::setDisplayToDecNumberAt(unsigned long number, byte dots, byte startingPos, boolean leadingZeros,
-        const byte numberFont[])
+void RecieverUI::setDisplayToDecNumberAt(unsigned long number, byte dots, byte startingPos, boolean leadingZeros,const byte numberFont[])
 {
   if (number > 99999999L) {
     setDisplayToError();
@@ -186,14 +185,13 @@ void RecieverUI::setDisplayToDecNumberAt(unsigned long number, byte dots, byte s
   }
 }
 
-void RecieverUI::setDisplayToDecNumber(unsigned long number, byte dots, boolean leadingZeros,
-        const byte numberFont[])
+void RecieverUI::setDisplayToDecNumber(unsigned long number, byte dots, boolean leadingZeros, const byte numberFont[])
 {
         setDisplayToDecNumberAt(number, dots, 0, leadingZeros, numberFont);
 }
 
 
-void TM1638::setDisplayToSignedDecNumber(signed long number, byte dots, boolean leadingZeros,
+void RecieverUI::setDisplayToSignedDecNumber(signed long number, byte dots, boolean leadingZeros,
                 const byte numberFont[])
 {
         if (number >= 0) {
