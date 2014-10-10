@@ -1,11 +1,22 @@
 /* This is a demonstration for the RecieverUI library
  * by Oussema HARBI <oussema.elharbi@gmail.com>
  * feel free to use, modify, update as you like, but plz keep me informed with your updates.
+ * This sketch demonstrates some functions on the display and after that it will
+ * write Eror on the display and keep blinking it;
+ * You can open the serial port, once display demo functions are done, you can press buttons on the UI or use an IR remote control and you ll be able to see the button you pressed via serial log
  */
 
 #include "RecieverUI.h"
+#include <IRremote.h>
 
 RecieverUI ui(7,8,9);
+
+int RECV_PIN = 2;
+
+IRrecv irrecv(RECV_PIN);
+
+decode_results results;
+
 
 byte values[4]={9, 3, 4, 6};
 
@@ -15,10 +26,13 @@ int j=0;
 void setup()
 {
   Serial.begin(9600);
+  
+  irrecv.enableIRIn(); // Start the receiver
+  
   ui.setupDisplay( true, 7); //Maximum brightness
   ui.setDisplayToString("CAN5");
   delay(1000);
-  ui.setDisplayDigit(7, 1, true);
+  ui.setDisplayDigit(7, 3, true);
   delay(1000);
   ui.clearDisplayDigit( 3, true);
   delay(1000);
@@ -43,13 +57,28 @@ void setup()
   
 }
 
+byte c=0;
+
 void loop()
 {
-  delay(1000);
+  delay(500);
   ui.setupDisplay( true, 0);
-  Serial.println(ui.getButtons(), DEC);
-  delay(1000);
+  c= ui.getButtons();
+  if (c != 0)
+    Serial.println( c, DEC);
+  if (irrecv.decode(&results)) {
+    Serial.println(results.value, HEX);
+    irrecv.resume(); // Receive the next value
+  }
+  delay(500);
   ui.setupDisplay( true, 7);
-  Serial.println(ui.getButtons(), DEC);
+  c= ui.getButtons();
+  if (c != 0)
+    Serial.println( c, DEC);
+  if (irrecv.decode(&results)) {
+    Serial.println(results.value, HEX);
+    irrecv.resume(); // Receive the next value
+  }
 }
+
 
